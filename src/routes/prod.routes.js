@@ -36,4 +36,43 @@ router.get("/listar", (req, res) => {
   res.status(200).json(produtos);
 });
 
+router.put("/editar/:id", (req, res) => {
+  const id = parseInt(req.params.id);
+  const { nome, preco, categoria, descricao, ano_safra } = req.body;
+
+  const index = produtos.findIndex(p => p.id_produto === id);
+
+  if (index === -1) {
+    return res.status(404).json({ message: "Produto não encontrado" });
+  }
+
+  produtos[index] = {
+    ...produtos[index],
+    nome: nome !== undefined ? nome : produtos[index].nome,
+    preco: preco !== undefined ? preco : produtos[index].preco,
+    categoria: categoria !== undefined ? categoria : produtos[index].categoria,
+    descricao: descricao !== undefined ? descricao : produtos[index].descricao,
+    ano_safra: ano_safra !== undefined ? ano_safra : produtos[index].ano_safra
+  };
+
+  return res.status(200).json({
+    message: "Produto atualizado com sucesso!",
+    produto: produtos[index]
+  });
+});
+
+router.delete("/excluir/:id", (req, res) => {
+  const id = parseInt(req.params.id);
+
+  const index = produtos.findIndex(p => p.id_produto === id);
+
+  if (index === -1) {
+    return res.status(404).json({ message: "Produto não encontrado" });
+  }
+
+  produtos.splice(index, 1);
+
+  return res.status(200).json({ message: "Produto excluído com sucesso" });
+});
+
 module.exports = router;
