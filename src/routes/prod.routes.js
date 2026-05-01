@@ -5,7 +5,7 @@ let produtos = [];
 
 router.post("/cadastro", (req, res) => {
   try {
-    const { nome, preco, categoria, descricao, ano_safra } = req.body;
+    const { nome, preco, categoria, descricao, ano_safra, url_imagem, estoque } = req.body;
 
     if (!nome || !preco) {
       return res.status(422).json({ message: "O nome e o preço são obrigatórios!" });
@@ -17,7 +17,9 @@ router.post("/cadastro", (req, res) => {
       preco,
       categoria,
       descricao,
-      ano_safra
+      ano_safra,
+      imagem: url_imagem,
+      estoque
     };
 
     produtos.push(novoProduto);
@@ -38,12 +40,29 @@ router.get("/listar", (req, res) => {
 
 router.put("/editar/:id", (req, res) => {
   const id = parseInt(req.params.id);
-  const { nome, preco, categoria, descricao, ano_safra } = req.body;
+
+  const { nome, preco, categoria, descricao, ano_safra, url_imagem, estoque } = req.body;
 
   const index = produtos.findIndex(p => p.id_produto === id);
 
   if (index === -1) {
-    return res.status(404).json({ message: "Produto não encontrado" });
+    const produtoRecuperado = {
+      id_produto: id,
+      nome,
+      preco,
+      categoria,
+      descricao,
+      ano_safra,
+      imagem: url_imagem,
+      estoque
+    };
+
+    produtos.push(produtoRecuperado);
+
+    return res.status(200).json({
+      message: "Servidor tinha perdido a memória, mas o produto foi recuperado e atualizado!",
+      produto: produtoRecuperado
+    });
   }
 
   produtos[index] = {
@@ -52,7 +71,9 @@ router.put("/editar/:id", (req, res) => {
     preco: preco !== undefined ? preco : produtos[index].preco,
     categoria: categoria !== undefined ? categoria : produtos[index].categoria,
     descricao: descricao !== undefined ? descricao : produtos[index].descricao,
-    ano_safra: ano_safra !== undefined ? ano_safra : produtos[index].ano_safra
+    ano_safra: ano_safra !== undefined ? ano_safra : produtos[index].ano_safra,
+    imagem: url_imagem !== undefined ? url_imagem : produtos[index].imagem,
+    estoque: estoque !== undefined ? estoque : produtos[index].estoque
   };
 
   return res.status(200).json({
@@ -67,7 +88,7 @@ router.delete("/excluir/:id", (req, res) => {
   const index = produtos.findIndex(p => p.id_produto === id);
 
   if (index === -1) {
-    return res.status(404).json({ message: "Produto não encontrado" });
+    return res.status(200).json({ message: "Produto já não estava no servidor. Exclusão confirmada!" });
   }
 
   produtos.splice(index, 1);
